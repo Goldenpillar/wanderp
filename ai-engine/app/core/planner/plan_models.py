@@ -77,10 +77,10 @@ class ActivityNode(BaseModel):
     description: str = Field("", description="活动描述")
     tips: list[str] = Field(default_factory=list, description="小贴士")
     energy_required: EnergyLevel = Field(EnergyLevel.MEDIUM, description="所需体力等级")
-    rating: Optional[float] = Field(None, ge=0, le=5, description="评分")
-    image_url: Optional[str] = Field(None, description="封面图片URL")
+    rating: Optional[float] = None
+    image_url: Optional[str] = None
     booking_required: bool = Field(False, description="是否需要预约")
-    booking_url: Optional[str] = Field(None, description="预约链接")
+    booking_url: Optional[str] = None
 
 
 class TransportSegment(BaseModel):
@@ -97,7 +97,7 @@ class TransportSegment(BaseModel):
 class DayPlan(BaseModel):
     """单日行程计划"""
     day_index: int = Field(..., ge=1, description="第几天")
-    date: Optional[date] = Field(None, description="具体日期")
+    date: Optional[date] = None
     theme: str = Field("", description="当日主题")
     activities: list[ActivityNode] = Field(default_factory=list, description="活动列表")
     transport_segments: list[TransportSegment] = Field(
@@ -127,8 +127,8 @@ class Itinerary(BaseModel):
     plan_id: str = Field(..., description="方案ID")
     destination: str = Field(..., description="目的地")
     days: int = Field(..., ge=1, description="行程天数")
-    start_date: Optional[date] = Field(None, description="开始日期")
-    end_date: Optional[date] = Field(None, description="结束日期")
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
     day_plans: list[DayPlan] = Field(default_factory=list, description="每日行程")
     total_budget: float = Field(0.0, ge=0, description="总预算(元)")
     total_cost: float = Field(0.0, ge=0, description="预估总费用(元)")
@@ -140,8 +140,8 @@ class Itinerary(BaseModel):
 
 class ConstraintConfig(BaseModel):
     """约束配置"""
-    daily_budget_max: Optional[float] = Field(None, description="每日最大预算")
-    total_budget_max: Optional[float] = Field(None, description="总预算上限")
+    daily_budget_max: Optional[float] = None
+    total_budget_max: Optional[float] = None
     daily_activity_hours_max: float = Field(12.0, ge=1, le=16, description="每日最大活动时长(小时)")
     daily_activity_hours_min: float = Field(4.0, ge=1, le=12, description="每日最小活动时长(小时)")
     max_walking_distance_meters: float = Field(15000.0, ge=0, description="每日最大步行距离(米)")

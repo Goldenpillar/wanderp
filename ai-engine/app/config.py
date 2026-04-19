@@ -15,7 +15,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class LLMSettings(BaseSettings):
     """通义千问 LLM 配置"""
 
-    dashscope_api_key: str = Field(..., description="通义千问API密钥")
+    dashscope_api_key: str = Field(default="mock", description="通义千问API密钥")
     llm_model: str = Field(default="qwen-max", description="LLM模型名称")
     llm_max_tokens: int = Field(default=4096, description="LLM最大生成token数")
     llm_temperature: float = Field(default=0.7, ge=0.0, le=2.0, description="LLM采样温度")
@@ -67,7 +67,7 @@ class RedisSettings(BaseSettings):
 class WeatherSettings(BaseSettings):
     """和风天气 API 配置"""
 
-    qweather_api_key: str = Field(..., description="和风天气API密钥")
+    qweather_api_key: str = Field(default="mock", description="和风天气API密钥")
     qweather_base_url: str = Field(
         default="https://devapi.qweather.com/v7",
         description="和风天气API基础URL",
@@ -79,7 +79,7 @@ class WeatherSettings(BaseSettings):
 class AmapSettings(BaseSettings):
     """高德地图 API 配置"""
 
-    amap_api_key: str = Field(..., description="高德地图API密钥")
+    amap_api_key: str = Field(default="mock", description="高德地图API密钥")
     amap_secret_key: str = Field(default="", description="高德地图签名密钥")
 
     model_config = SettingsConfigDict(env_prefix="", env_file=".env")
@@ -88,7 +88,7 @@ class AmapSettings(BaseSettings):
 class JuheSettings(BaseSettings):
     """聚合数据 API 配置"""
 
-    juhe_api_key: str = Field(..., description="聚合数据API密钥")
+    juhe_api_key: str = Field(default="mock", description="聚合数据API密钥")
 
     model_config = SettingsConfigDict(env_prefix="", env_file=".env")
 
@@ -96,8 +96,8 @@ class JuheSettings(BaseSettings):
 class FeizhuSettings(BaseSettings):
     """飞猪开放平台 API 配置"""
 
-    feizhu_app_key: str = Field(..., description="飞猪应用Key")
-    feizhu_app_secret: str = Field(..., description="飞猪应用Secret")
+    feizhu_app_key: str = Field(default="mock", description="飞猪应用Key")
+    feizhu_app_secret: str = Field(default="mock", description="飞猪应用Secret")
 
     model_config = SettingsConfigDict(env_prefix="", env_file=".env")
 
@@ -116,6 +116,7 @@ class AppSettings(BaseSettings):
         description="CORS允许的源(逗号分隔)",
     )
     cors_allow_credentials: bool = Field(default=True, description="CORS允许携带凭证")
+    use_mock_data: bool = Field(default=True, description="是否使用Mock数据模式（无需外部API）")
 
     model_config = SettingsConfigDict(env_prefix="", env_file=".env")
 

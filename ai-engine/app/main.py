@@ -31,31 +31,41 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("WanderP AI Engine 正在启动...")
 
     # ---- 启动阶段 ----
-    try:
-        # 初始化Redis连接池
-        from app.utils.cache import get_redis_client
+    settings = get_settings()
 
-        redis_client = get_redis_client()
-        await redis_client.ping()
-        logger.info("Redis 连接成功")
+    if settings.app.use_mock_data:
+        # Mock 数据模式：跳过外部服务初始化
+        logger.info("=" * 50)
+        logger.info("  使用 Mock 数据模式")
+        logger.info("  跳过 Redis/Milvus 初始化")
+        logger.info("  所有数据从本地 JSON 文件加载")
+        logger.info("=" * 50)
+    else:
+        try:
+            # 初始化Redis连接池
+            from app.utils.cache import get_redis_client
 
-        # 初始化Milvus连接
-        from app.core.rag.vector_store import VectorStore
+            redis_client = get_redis_client()
+            await redis_client.ping()
+            logger.info("Redis 连接成功")
 
-        vector_store = VectorStore()
-        await vector_store.connect()
-        logger.info("Milvus 连接成功")
+            # 初始化Milvus连接
+            from app.core.rag.vector_store import VectorStore
 
-        # 初始化知识库（如果集合不存在则创建）
-        from app.core.rag.knowledge_base import KnowledgeBase
+            vector_store = VectorStore()
+            await vector_store.connect()
+            logger.info("Milvus 连接成功")
 
-        kb = KnowledgeBase(vector_store=vector_store)
-        await kb.initialize()
-        logger.info("知识库初始化完成")
+            # 初始化知识库（如果集合不存在则创建）
+            from app.core.rag.knowledge_base import KnowledgeBase
 
-    except Exception as e:
-        logger.warning(f"启动时部分服务初始化失败（非致命）: {e}")
-        logger.warning("服务将以降级模式运行，部分功能可能不可用")
+            kb = KnowledgeBase(vector_store=vector_store)
+            await kb.initialize()
+            logger.info("知识库初始化完成")
+
+        except Exception as e:
+            logger.warning(f"启动时部分服务初始化失败（非致命）: {e}")
+            logger.warning("服务将以降级模式运行，部分功能可能不可用")
 
     logger.info("WanderP AI Engine 启动完成")
 
@@ -64,22 +74,23 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # ---- 关闭阶段 ----
     logger.info("WanderP AI Engine 正在关闭...")
 
-    try:
-        # 关闭Redis连接
-        from app.utils.cache import close_redis_client
+    if not settings.app.use_mock_data:
+        try:
+            # 关闭Redis连接
+            from app.utils.cache import close_redis_client
 
-        await close_redis_client()
-        logger.info("Redis 连接已关闭")
+            await close_redis_client()
+            logger.info("Redis 连接已关闭")
 
-        # 关闭Milvus连接
-        from app.core.rag.vector_store import VectorStore
+            # 关闭Milvus连接
+            from app.core.rag.vector_store import VectorStore
 
-        vector_store = VectorStore()
-        await vector_store.disconnect()
-        logger.info("Milvus 连接已关闭")
+            vector_store = VectorStore()
+            await vector_store.disconnect()
+            logger.info("Milvus 连接已关闭")
 
-    except Exception as e:
-        logger.warning(f"关闭时发生错误: {e}")
+        except Exception as e:
+            logger.warning(f"关闭时发生错误: {e}")
 
     logger.info("WanderP AI Engine 已关闭")
 
