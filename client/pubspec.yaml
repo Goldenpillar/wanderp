@@ -1,0 +1,82 @@
+name: wanderp
+description: WanderP - 智能旅行规划与协作平台 Flutter 客户端
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # 状态管理
+  flutter_bloc: ^8.1.3
+  equatable: ^2.0.5
+
+  # 依赖注入 / Provider
+  flutter_riverpod: ^2.4.9
+  riverpod_annotation: ^2.3.3
+
+  # 网络请求
+  dio: ^5.4.0
+  connectivity_plus: ^5.0.2
+
+  # 地图
+  amap_flutter_map: ^3.0.0
+  amap_flutter_location: ^3.0.0
+
+  # 本地存储
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  isar_generator: ^3.1.0+1
+
+  # 实时协作
+  yjs: ^0.1.4
+  web_socket_channel: ^2.4.0
+
+  # 消息推送
+  mqtt_client: ^10.2.0
+
+  # 路由
+  go_router: ^13.0.0
+
+  # UI 组件
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+  flutter_svg: ^2.0.9
+  photo_view: ^0.14.0
+
+  # 工具
+  intl: ^0.19.0
+  uuid: ^4.3.3
+  json_annotation: ^4.8.1
+  freezed_annotation: ^2.4.1
+  geolocator: ^10.1.0
+  geocoding: ^2.1.1
+  permission_handler: ^11.3.0
+  url_launcher: ^6.2.4
+  share_plus: ^7.2.1
+  image_picker: ^1.0.7
+  flutter_local_notifications: ^16.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  build_runner: ^2.4.8
+  json_serializable: ^6.7.1
+  freezed: ^2.4.6
+  bloc_test: ^9.1.5
+  mocktail: ^1.0.1
+
+flutter:
+  uses-material-design: true
+
+  # 资源文件
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/fonts/

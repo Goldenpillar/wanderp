@@ -1,0 +1,46 @@
+# 开发环境配置
+server:
+  port: 8080
+  mode: debug  # debug / release / test
+
+database:
+  host: localhost
+  port: 5432
+  user: wanderp
+  password: wanderp_dev_password
+  dbname: wanderp
+  sslmode: disable
+  timezone: Asia/Shanghai
+
+redis:
+  addr: localhost:6379
+  password: ""
+  db: 0
+
+influxdb:
+  url: http://localhost:8086
+  token: your-influxdb-token-placeholder
+  org: wanderp
+  bucket: trajectories
+
+mongodb:
+  uri: mongodb://localhost:27017
+  database: wanderp
+
+jwt:
+  secret: your-jwt-secret-key-change-in-production
+  expire_hour: 72
+
+amap:
+  key: your-amap-api-key-placeholder
+  base_url: https://restapi.amap.com/v3
+
+mqtt:
+  broker: tcp://localhost:1883
+  client_id: wanderp-server
+  username: ""
+  password: ""
+
+log:
+  level: debug  # debug / info / warn / error
+  format: console  # json / console

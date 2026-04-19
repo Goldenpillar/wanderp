@@ -1,0 +1,46 @@
+# 生产环境配置
+server:
+  port: 8080
+  mode: release
+
+database:
+  host: ${DB_HOST}
+  port: 5432
+  user: ${DB_USER}
+  password: ${DB_PASSWORD}
+  dbname: wanderp
+  sslmode: require
+  timezone: Asia/Shanghai
+
+redis:
+  addr: ${REDIS_ADDR}
+  password: ${REDIS_PASSWORD}
+  db: 0
+
+influxdb:
+  url: ${INFLUXDB_URL}
+  token: ${INFLUXDB_TOKEN}
+  org: wanderp
+  bucket: trajectories
+
+mongodb:
+  uri: ${MONGODB_URI}
+  database: wanderp
+
+jwt:
+  secret: ${JWT_SECRET}
+  expire_hour: 72
+
+amap:
+  key: ${AMAP_API_KEY}
+  base_url: https://restapi.amap.com/v3
+
+mqtt:
+  broker: ${MQTT_BROKER}
+  client_id: wanderp-server-prod
+  username: ${MQTT_USERNAME}
+  password: ${MQTT_PASSWORD}
+
+log:
+  level: info
+  format: json

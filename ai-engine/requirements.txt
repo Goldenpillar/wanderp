@@ -1,0 +1,34 @@
+# ============================================
+# WanderP AI Engine - 依赖清单
+# ============================================
+
+# Web框架
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+
+# 数据验证与配置
+pydantic>=2.10.0
+pydantic-settings>=2.7.0
+
+# HTTP客户端
+httpx>=0.28.0
+
+# LLM与RAG
+llama-index>=0.12.0
+llama-index-core>=0.12.0
+dashscope>=1.20.0
+
+# 约束求解
+ortools>=9.11
+
+# 向量数据库
+pymilvus>=2.5.0
+
+# 缓存
+redis>=5.2.0
+
+# NLP工具
+jieba>=0.42.1
+
+# 数值计算
+numpy>=2.0.0

@@ -1,0 +1,1207 @@
+openapi: 3.0.3
+info:
+  title: WanderP 旅行规划平台 API
+  description: WanderP旅行规划平台后端API文档
+  version: 1.0.0
+  contact:
+    name: WanderP Team
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: 开发环境
+
+tags:
+  - name: 认证
+    description: 用户认证相关接口
+  - name: 用户
+    description: 用户管理相关接口
+  - name: 行程
+    description: 行程管理相关接口
+  - name: AI规划
+    description: AI智能规划相关接口
+  - name: 偏好
+    description: 用户偏好设置接口
+  - name: 路线规划
+    description: 路线规划相关接口
+  - name: POI搜索
+    description: 兴趣点搜索相关接口
+  - name: 美食
+    description: 美食搜索与推荐接口
+  - name: 轨迹
+    description: 轨迹记录相关接口
+  - name: 消费
+    description: 消费记录相关接口
+  - name: 推送
+    description: 消息推送相关接口
+  - name: WebSocket
+    description: WebSocket实时通信接口
+
+paths:
+  # ==================== 认证接口 ====================
+  /user/auth/register:
+    post:
+      tags: [认证]
+      summary: 用户注册
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: 注册成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+
+  /user/auth/login:
+    post:
+      tags: [认证]
+      summary: 用户登录
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+
+  /user/auth/refresh:
+    post:
+      tags: [认证]
+      summary: 刷新令牌
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 刷新成功
+
+  /user/auth/password:
+    put:
+      tags: [认证]
+      summary: 修改密码
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [old_password, new_password]
+              properties:
+                old_password:
+                  type: string
+                new_password:
+                  type: string
+                  minLength: 8
+      responses:
+        '200':
+          description: 修改成功
+
+  # ==================== 用户接口 ====================
+  /user/profile:
+    get:
+      tags: [用户]
+      summary: 获取用户资料
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 用户资料
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+    put:
+      tags: [用户]
+      summary: 更新用户资料
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfile'
+      responses:
+        '200':
+          description: 更新成功
+
+  /user/search:
+    get:
+      tags: [用户]
+      summary: 搜索用户
+      parameters:
+        - name: keyword
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 搜索结果
+
+  /user/{id}:
+    get:
+      tags: [用户]
+      summary: 获取用户信息
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 用户信息
+
+  # ==================== 行程接口 ====================
+  /planner/trips:
+    get:
+      tags: [行程]
+      summary: 列出行程
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 行程列表
+    post:
+      tags: [行程]
+      summary: 创建行程
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Trip'
+      responses:
+        '200':
+          description: 创建成功
+
+  /planner/trips/{id}:
+    get:
+      tags: [行程]
+      summary: 获取行程详情
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 行程详情
+    put:
+      tags: [行程]
+      summary: 更新行程
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Trip'
+      responses:
+        '200':
+          description: 更新成功
+    delete:
+      tags: [行程]
+      summary: 删除行程
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 删除成功
+
+  /planner/trips/{id}/members:
+    get:
+      tags: [行程]
+      summary: 列出行程成员
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成员列表
+    post:
+      tags: [行程]
+      summary: 添加行程成员
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id:
+                  type: integer
+                role:
+                  type: string
+                  enum: [owner, editor, viewer]
+                  default: viewer
+      responses:
+        '200':
+          description: 添加成功
+
+  # ==================== AI规划接口 ====================
+  /planner/plan/generate:
+    post:
+      tags: [AI规划]
+      summary: AI生成行程规划
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [destination, days]
+              properties:
+                destination:
+                  type: string
+                  example: 东京
+                days:
+                  type: integer
+                  minimum: 1
+                  maximum: 30
+                  example: 5
+                preferences:
+                  $ref: '#/components/schemas/Preference'
+      responses:
+        '200':
+          description: 规划生成中
+
+  /planner/plan/{id}/optimize:
+    post:
+      tags: [AI规划]
+      summary: 优化行程规划
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                feedback:
+                  type: string
+      responses:
+        '200':
+          description: 优化中
+
+  /planner/plan/{id}/activities:
+    post:
+      tags: [AI规划]
+      summary: 添加活动
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Activity'
+      responses:
+        '200':
+          description: 添加成功
+
+  /planner/plan/activities/{activityId}/vote:
+    post:
+      tags: [AI规划]
+      summary: 活动投票
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type]
+              properties:
+                type:
+                  type: string
+                  enum: [up, down]
+      responses:
+        '200':
+          description: 投票成功
+
+  /planner/plan/recommendations:
+    get:
+      tags: [AI规划]
+      summary: 获取推荐活动
+      parameters:
+        - name: destination
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 推荐列表
+
+  # ==================== 偏好接口 ====================
+  /planner/preferences:
+    get:
+      tags: [偏好]
+      summary: 获取用户偏好
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 偏好设置
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preference'
+    put:
+      tags: [偏好]
+      summary: 更新用户偏好
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Preference'
+      responses:
+        '200':
+          description: 更新成功
+
+  # ==================== 路线规划接口 ====================
+  /map/route/plan:
+    post:
+      tags: [路线规划]
+      summary: 规划路线
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteRequest'
+      responses:
+        '200':
+          description: 路线信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+
+  /map/route/multiple:
+    post:
+      tags: [路线规划]
+      summary: 获取备选路线
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteRequest'
+      responses:
+        '200':
+          description: 多条备选路线
+
+  /map/route/transit:
+    post:
+      tags: [路线规划]
+      summary: 获取公交路线
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [origin, destination, city]
+              properties:
+                origin:
+                  $ref: '#/components/schemas/Location'
+                destination:
+                  $ref: '#/components/schemas/Location'
+                city:
+                  type: string
+      responses:
+        '200':
+          description: 公交路线
+
+  # ==================== POI搜索接口 ====================
+  /map/poi/search:
+    get:
+      tags: [POI搜索]
+      summary: 搜索兴趣点
+      parameters:
+        - name: keyword
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: latitude
+          in: query
+          schema:
+            type: number
+        - name: longitude
+          in: query
+          schema:
+            type: number
+        - name: radius
+          in: query
+          schema:
+            type: integer
+            default: 3000
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: POI列表
+
+  /map/poi/nearby:
+    get:
+      tags: [POI搜索]
+      summary: 搜索附近POI
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: radius
+          in: query
+          schema:
+            type: integer
+            default: 3000
+        - name: types
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 附近POI列表
+
+  /map/poi/{id}:
+    get:
+      tags: [POI搜索]
+      summary: 获取POI详情
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: POI详情
+
+  # ==================== 美食接口 ====================
+  /map/poi/food:
+    get:
+      tags: [美食]
+      summary: 搜索美食
+      description: 搜索目的地附近的美食推荐
+      parameters:
+        - name: keyword
+          in: query
+          schema:
+            type: string
+        - name: city
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: latitude
+          in: query
+          schema:
+            type: number
+        - name: longitude
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: 美食列表
+
+  # ==================== 轨迹接口 ====================
+  /map/trajectory/upload:
+    post:
+      tags: [轨迹]
+      summary: 上传轨迹
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Trajectory'
+      responses:
+        '200':
+          description: 上传成功
+
+  /map/trajectory:
+    get:
+      tags: [轨迹]
+      summary: 获取轨迹
+      parameters:
+        - name: tripId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: userId
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 轨迹数据
+
+  /map/trajectory/share:
+    post:
+      tags: [轨迹]
+      summary: 分享位置
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrajectoryPoint'
+      responses:
+        '200':
+          description: 分享成功
+
+  # ==================== 消费接口 ====================
+  /user/expenses:
+    get:
+      tags: [消费]
+      summary: 获取消费列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tripId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 消费列表
+    post:
+      tags: [消费]
+      summary: 创建消费记录
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseCreateRequest'
+      responses:
+        '200':
+          description: 创建成功
+
+  /user/expenses/{id}:
+    get:
+      tags: [消费]
+      summary: 获取消费记录
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 消费详情
+    put:
+      tags: [消费]
+      summary: 更新消费记录
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Expense'
+      responses:
+        '200':
+          description: 更新成功
+    delete:
+      tags: [消费]
+      summary: 删除消费记录
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 删除成功
+
+  /user/expenses/summary/{tripId}:
+    get:
+      tags: [消费]
+      summary: 获取消费汇总
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 消费汇总
+
+  # ==================== 推送接口 ====================
+  /notification/push/send:
+    post:
+      tags: [推送]
+      summary: 发送推送通知
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, title, body]
+              properties:
+                user_id:
+                  type: integer
+                title:
+                  type: string
+                body:
+                  type: string
+                data:
+                  type: object
+      responses:
+        '200':
+          description: 推送已发送
+
+  /notification/push/subscribe:
+    post:
+      tags: [推送]
+      summary: 订阅推送
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [device_token, platform]
+              properties:
+                device_token:
+                  type: string
+                platform:
+                  type: string
+                  enum: [ios, android]
+      responses:
+        '200':
+          description: 订阅成功
+
+  # ==================== WebSocket接口 ====================
+  /notification/ws:
+    get:
+      tags: [WebSocket]
+      summary: WebSocket连接
+      description: 建立WebSocket连接进行实时通信
+      responses:
+        '101':
+          description: 切换协议到WebSocket
+
+  /notification/ws/online:
+    get:
+      tags: [WebSocket]
+      summary: 获取在线人数
+      responses:
+        '200':
+          description: 在线人数
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Response:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: success
+        data:
+          type: object
+
+    RegisterRequest:
+      type: object
+      required: [username, email, password]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        password:
+          type: string
+          minLength: 8
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+            expires_at:
+              type: integer
+            user:
+              $ref: '#/components/schemas/UserProfile'
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        nickname:
+          type: string
+        avatar:
+          type: string
+        bio:
+          type: string
+        gender:
+          type: string
+          enum: [male, female, unknown]
+        location:
+          type: string
+
+    Trip:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        destination:
+          type: string
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+        cover_image:
+          type: string
+        status:
+          type: string
+          enum: [draft, planning, confirmed, completed, cancelled]
+        budget:
+          type: number
+          format: double
+        activities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Activity'
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/TripMember'
+
+    Activity:
+      type: object
+      properties:
+        id:
+          type: integer
+        trip_id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [sightseeing, food, transport, accommodation, shopping, entertainment]
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        address:
+          type: string
+        cost:
+          type: number
+          format: double
+        sort_order:
+          type: integer
+        day_index:
+          type: integer
+
+    TripMember:
+      type: object
+      properties:
+        id:
+          type: integer
+        trip_id:
+          type: integer
+        user_id:
+          type: integer
+        role:
+          type: string
+          enum: [owner, editor, viewer]
+        joined_at:
+          type: string
+          format: date-time
+
+    Preference:
+      type: object
+      properties:
+        travel_style:
+          type: string
+          enum: [relax, adventure, culture, food, nature]
+        taste_prefs:
+          type: string
+        budget_level:
+          type: string
+          enum: [low, medium, high]
+        pace_level:
+          type: string
+          enum: [slow, moderate, fast]
+        accommodation:
+          type: string
+          enum: [hotel, hostel, apartment, camping]
+        transport:
+          type: string
+          enum: [walking, driving, public, ride]
+        interests:
+          type: array
+          items:
+            type: string
+        avoidances:
+          type: array
+          items:
+            type: string
+
+    Location:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        address:
+          type: string
+        city:
+          type: string
+        province:
+          type: string
+
+    RouteRequest:
+      type: object
+      required: [origin, destination, mode]
+      properties:
+        origin:
+          $ref: '#/components/schemas/Location'
+        destination:
+          $ref: '#/components/schemas/Location'
+        mode:
+          type: string
+          enum: [driving, walking, transit, cycling]
+        waypoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+        strategy:
+          type: string
+          enum: [fastest, shortest, most_economic]
+        avoid_tolls:
+          type: boolean
+        avoid_highway:
+          type: boolean
+
+    Route:
+      type: object
+      properties:
+        origin:
+          $ref: '#/components/schemas/Location'
+        destination:
+          $ref: '#/components/schemas/Location'
+        distance:
+          type: integer
+          description: 距离(米)
+        duration:
+          type: integer
+          description: 时长(秒)
+        strategy:
+          type: string
+        polyline:
+          type: string
+
+    TrajectoryPoint:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        speed:
+          type: number
+          format: double
+        direction:
+          type: number
+          format: double
+        altitude:
+          type: number
+          format: double
+        timestamp:
+          type: integer
+
+    Trajectory:
+      type: object
+      properties:
+        trip_id:
+          type: integer
+        user_id:
+          type: integer
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrajectoryPoint'
+        total_distance:
+          type: number
+          format: double
+        total_time:
+          type: integer
+        start_time:
+          type: integer
+        end_time:
+          type: integer
+
+    Expense:
+      type: object
+      properties:
+        id:
+          type: integer
+        trip_id:
+          type: integer
+        user_id:
+          type: integer
+        category:
+          type: string
+          enum: [food, transport, accommodation, ticket, shopping, other]
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string
+          default: CNY
+        description:
+          type: string
+        pay_method:
+          type: string
+          enum: [cash, card, wechat, alipay]
+        payer_id:
+          type: integer
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        photo_url:
+          type: string
+        expense_time:
+          type: string
+          format: date-time
+
+    ExpenseCreateRequest:
+      type: object
+      required: [trip_id, category, amount, payer_id]
+      properties:
+        trip_id:
+          type: integer
+        category:
+          type: string
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string
+        description:
+          type: string
+        pay_method:
+          type: string
+        payer_id:
+          type: integer
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        photo_url:
+          type: string
+        expense_time:
+          type: string
+          format: date-time

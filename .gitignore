@@ -1,0 +1,220 @@
+# =============================================================================
+# WanderP - .gitignore
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# 操作系统文件
+# ---------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ---------------------------------------------------------------------------
+# IDE / 编辑器
+# ---------------------------------------------------------------------------
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains (GoLand / IntelliJ / WebStorm)
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# ---------------------------------------------------------------------------
+# Go
+# ---------------------------------------------------------------------------
+# 编译产物
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+server/bin/
+server/tmp/
+
+# 测试产物
+*.test
+*.out
+coverage.txt
+coverage.html
+*.prof
+
+# Go workspace
+go.work
+go.work.sum
+
+# 依赖（vendor模式除外）
+vendor/
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+# 字节码
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# 虚拟环境
+ai-engine/.venv/
+ai-engine/venv/
+ai-engine/env/
+.env
+.venv
+venv/
+env/
+
+# 分发
+*.egg-info/
+*.egg
+dist/
+build/
+eggs/
+
+# Python打包
+*.whl
+*.tar.gz
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# pytest
+.pytest_cache/
+htmlcov/
+.tox/
+.nox/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ---------------------------------------------------------------------------
+# Flutter / Dart
+# ---------------------------------------------------------------------------
+# Flutter/Dart相关
+client/.dart_tool/
+client/.packages
+client/.pub-cache/
+client/.pub/
+client/build/
+client/.flutter-plugins
+client/.flutter-plugins-dependencies
+client/pubspec.lock
+
+# Android
+client/android/app/debug/
+client/android/app/profile/
+client/android/app/release/
+client/android/.gradle/
+client/android/local.properties
+client/android/**/GeneratedPluginRegistrant.java
+client/android/key.properties
+*.jks
+*.keystore
+
+# iOS
+client/ios/Pods/
+client/ios/.symlinks/
+client/ios/Flutter/
+client/ios/Flutter/App.framework/
+client/ios/Flutter/Flutter.framework/
+client/ios/Flutter/Flutter.podspec
+client/ios/ServiceDefinitions.json
+client/ios/Runner/GeneratedPluginRegistrant.m
+
+# Web
+client/web/favicon.png
+client/lib/generated_plugin_registrant.dart
+
+# macOS
+client/macos/Flutter/GeneratedPluginRegistrant.swift
+client/macos/Pods/
+
+# Windows
+client/windows/flutter/generated_plugin_registrant.cc
+client/windows/flutter/generated_plugin_registrant.h
+client/windows/flutter/generated_plugins.cmake
+
+# Linux
+client/linux/flutter/generated_plugin_registrant.cc
+client/linux/flutter/generated_plugin_registrant.h
+
+# 测试
+client/coverage/
+
+# ---------------------------------------------------------------------------
+# Docker
+# ---------------------------------------------------------------------------
+docker-compose.override.yaml
+
+# ---------------------------------------------------------------------------
+# 环境变量与密钥
+# ---------------------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+*.p12
+
+# ---------------------------------------------------------------------------
+# 数据与日志
+# ---------------------------------------------------------------------------
+*.log
+*.sql.gz
+logs/
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# ---------------------------------------------------------------------------
+# AI/ML 模型与数据
+# ---------------------------------------------------------------------------
+*.pt
+*.pth
+*.onnx
+*.bin
+*.h5
+*.pkl
+*.pickle
+ai-engine/data/embeddings/*.npy
+ai-engine/data/embeddings/*.index
+ai-engine/data/knowledge/*.json
+
+# ---------------------------------------------------------------------------
+# 文档与临时文件
+# ---------------------------------------------------------------------------
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+.cache/
+temp/
+tmp/
+
+# ---------------------------------------------------------------------------
+# MinIO 数据
+# ---------------------------------------------------------------------------
+minio-data/
