@@ -102,6 +102,11 @@ BEIJING_REGIONS = {
         "lng_range": (116.370, 116.400),
         "description": "鸟巢、水立方",
     },
+    "长城-十三陵": {
+        "lat_range": (40.300, 40.450),
+        "lng_range": (116.000, 116.200),
+        "description": "八达岭长城、十三陵一带",
+    },
 }
 
 # 城市到区域映射
@@ -140,6 +145,10 @@ class LocalPlanner:
     def __init__(self):
         """初始化规划器"""
         self._plan_id = str(uuid.uuid4())
+        # 已使用的餐厅名称集合，避免同一天重复推荐同一餐厅
+        self._used_restaurant_names: set[str] = set()
+        # 已使用的区域名称集合，确保每天分配不同区域
+        self._used_regions: set[str] = set()
 
     def generate_itinerary(self, request: PlanRequest) -> Itinerary:
         """
@@ -157,6 +166,9 @@ class LocalPlanner:
         )
 
         self._plan_id = str(uuid.uuid4())
+        # 重置已使用的餐厅和区域集合，确保每次生成行程时从零开始
+        self._used_restaurant_names = set()
+        self._used_regions = set()
         destination = request.destination
         days = request.days
         preferences = request.preferences or []
@@ -339,6 +351,8 @@ class LocalPlanner:
             )
             activities.append(lunch_act)
             total_cost += lunch_act.cost
+            # 将午餐餐厅名加入已使用集合，避免晚餐重复推荐
+            self._used_restaurant_names.add(lunch.get("name", ""))
 
             # 午餐备选
             if len(lunch_restaurants) > 1:
@@ -386,6 +400,8 @@ class LocalPlanner:
             )
             activities.append(dinner_act)
             total_cost += dinner_act.cost
+            # 将晚餐餐厅名加入已使用集合，避免后续天重复推荐
+            self._used_restaurant_names.add(dinner.get("name", ""))
 
             # 晚餐备选
             if len(dinner_restaurants) > 1:
@@ -440,7 +456,7 @@ class LocalPlanner:
         count: int = 3,
     ) -> list[dict]:
         """
-        选择当天的景区（同一区域优先）
+        选择当天的景区（优先选择未使用的区域，确保每天地理上相近）
 
         Args:
             all_spots: 所有景区
@@ -460,7 +476,21 @@ class LocalPlanner:
         if not available:
             return []
 
-        # 尝试从同一区域选择
+        # 优先从未使用的区域中选择，确保每天分配不同区域
+        for region_name, spots in region_spots.items():
+            if region_name in self._used_regions:
+                continue  # 跳过已使用的区域
+            region_available = [
+                (i, spot) for i, spot in enumerate(all_spots)
+                if spot in spots and i not in used_indices
+            ]
+            if len(region_available) >= count:
+                selected = [spot for _, spot in region_available[:count]]
+                # 将该区域标记为已使用
+                self._used_regions.add(region_name)
+                return selected
+
+        # 如果未使用的区域中没有足够景区，从已使用的区域中再选
         for region_name, spots in region_spots.items():
             region_available = [
                 (i, spot) for i, spot in enumerate(all_spots)
@@ -468,6 +498,7 @@ class LocalPlanner:
             ]
             if len(region_available) >= count:
                 selected = [spot for _, spot in region_available[:count]]
+                self._used_regions.add(region_name)
                 return selected
 
         # 如果同一区域不够，从可用列表中选择（按评分排序）
@@ -480,6 +511,7 @@ class LocalPlanner:
         food_preferences: Optional[str],
         price_range: str = "mid",
         count: int = 3,
+        used_names: Optional[set[str]] = None,
     ) -> list[dict]:
         """
         选择餐厅推荐
@@ -489,6 +521,7 @@ class LocalPlanner:
             food_preferences: 饮食偏好
             price_range: 价格档次 (low/mid/high)
             count: 需要选择的数量
+            used_names: 已使用的餐厅名称集合，用于过滤重复推荐
 
         Returns:
             选中的餐厅列表
@@ -496,29 +529,43 @@ class LocalPlanner:
         if not restaurants:
             return []
 
+        # 获取已使用的餐厅名称集合
+        if used_names is None:
+            used_names = self._used_restaurant_names
+
+        # 过滤掉已使用的餐厅，避免重复推荐
+        filtered = [
+            r for r in restaurants
+            if r.get("name", "") not in used_names
+        ]
+
+        # 如果过滤后餐厅不足，回退到使用全部餐厅
+        if len(filtered) < count:
+            filtered = restaurants
+
         # 按菜系偏好筛选
-        filtered = restaurants
+        cuisine_filtered = filtered
         if food_preferences:
-            filtered = [
-                r for r in restaurants
+            cuisine_filtered = [
+                r for r in filtered
                 if food_preferences in r.get("cuisine", "")
                 or food_preferences in r.get("cuisine_type", "")
                 or food_preferences in r.get("description", "")
             ]
-            # 如果筛选后太少，使用全部
-            if len(filtered) < count:
-                filtered = restaurants
+            # 如果筛选后太少，使用过滤后的全部
+            if len(cuisine_filtered) < count:
+                cuisine_filtered = filtered
 
         # 按价格档次筛选
         if price_range == "low":
-            filtered = sorted(filtered, key=lambda x: x.get("avg_price", 999))[:count]
+            result = sorted(cuisine_filtered, key=lambda x: x.get("avg_price", 999))[:count]
         elif price_range == "high":
-            filtered = sorted(filtered, key=lambda x: x.get("avg_price", 0), reverse=True)[:count]
+            result = sorted(cuisine_filtered, key=lambda x: x.get("avg_price", 0), reverse=True)[:count]
         else:
-            # mid: 取中间价位
-            filtered = sorted(filtered, key=lambda x: x.get("rating", 0), reverse=True)[:count]
+            # mid: 按评分排序
+            result = sorted(cuisine_filtered, key=lambda x: x.get("rating", 0), reverse=True)[:count]
 
-        return filtered[:count]
+        return result[:count]
 
     def _select_evening_events(
         self,

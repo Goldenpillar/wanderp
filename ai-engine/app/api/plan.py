@@ -83,6 +83,10 @@ async def create_plan(
                 days=request.days,
                 itinerary=result.get("itinerary", []),
                 total_budget=result.get("total_budget", 0),
+                total_cost=result.get("total_cost", 0),
+                travelers_count=result.get("travelers_count", 1),
+                tags=result.get("tags", []),
+                warnings=result.get("warnings", []),
                 tips=result.get("tips", []),
             )
         else:
@@ -100,6 +104,10 @@ async def create_plan(
                 days=request.days,
                 itinerary=result.get("itinerary", []),
                 total_budget=result.get("total_budget", 0),
+                total_cost=result.get("total_cost", 0),
+                travelers_count=result.get("travelers_count", 1),
+                tags=result.get("tags", []),
+                warnings=result.get("warnings", []),
                 tips=result.get("tips", []),
             )
 
@@ -379,11 +387,12 @@ def _itinerary_to_result(itinerary) -> dict:
     """
     return {
         "plan_id": itinerary.plan_id,
+        "status": "completed",
         "destination": itinerary.destination,
         "days": itinerary.days,
         "start_date": str(itinerary.start_date) if itinerary.start_date else None,
         "end_date": str(itinerary.end_date) if itinerary.end_date else None,
-        "itinerary": [dp.model_dump() for dp in itinerary.day_plans],
+        "itinerary": [dp.model_dump(mode='json') for dp in itinerary.day_plans],
         "total_budget": itinerary.total_budget,
         "total_cost": itinerary.total_cost,
         "travelers_count": itinerary.travelers_count,

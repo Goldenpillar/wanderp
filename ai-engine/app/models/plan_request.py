@@ -41,6 +41,10 @@ class PlanResponse(BaseModel):
     days: int = Field(..., description="行程天数")
     itinerary: list = Field(default_factory=list, description="每日行程列表")
     total_budget: float = Field(0, description="总预算(元)")
+    total_cost: float = Field(0, description="预计总花费(元)")
+    travelers_count: int = Field(1, description="旅行人数")
+    tags: list[str] = Field(default_factory=list, description="行程标签")
+    warnings: list[str] = Field(default_factory=list, description="注意事项/警告")
     tips: list[str] = Field(default_factory=list, description="旅行小贴士")
 
 
